@@ -1,8 +1,9 @@
-local pannelWidth = 500
+local panelWidth = 500
+local panelHeight = 440
 local buttonEdgeMargin = 10
 local buttonSliderHSpace = 16
 local cameraStartStopButtonWidth = 100
-local sliderWidth = pannelWidth - 2 * buttonEdgeMargin - 2 * buttonSliderHSpace - 2 * cameraStartStopButtonWidth
+local sliderWidth = panelWidth - 2 * buttonEdgeMargin - 2 * buttonSliderHSpace - 2 * cameraStartStopButtonWidth
 
 local moveViewInStartButton
 local moveViewInSpeedSlider
@@ -27,6 +28,9 @@ local moveViewUpStopButton
 local moveViewDownStartButton
 local moveViewDownSpeedSlider
 local moveViewDownStopButton  
+
+local cameraControlFrame
+local CameraControlFrameName = "CameraControlFrame"
 
 local function stopAllCameraMove()
     MoveViewOutStop()
@@ -106,40 +110,31 @@ local function buildASlider(globalName, alignButton, parent)
 end
 
 function showCameraControl()
-
-    local cameraControlFrame
-    local bgLabel
-
-    local backdropInfo = {
-        bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-        edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-        tile = true,
-        tileEdge = true,
-        edgeSize = 16,
-        insets = {
-            left = 4,
-            right = 4,
-            top = 4,
-            bottom = 4
-        }
-    }
-
-    cameraControlFrame = FrameBackdrop
-    if not cameraControlFrame:IsVisible() then
+    if cameraControlFrame ~= nil and not cameraControlFrame:IsVisible() then
       cameraControlFrame:Show()
       return
     end
-    cameraControlFrame:SetBackdrop(backdropInfo);
-    cameraControlFrame:SetBackdropColor(0, 0, 0, 1)
 
-    bgLabel = FrameFontString
-    bgLabel:SetText("镜头录制控制器")
-    bgLabel:SetPoint("TOP", "FrameBackdrop", "TOP", 0, -20)
-    bgLabel:SetTextColor(1, 1, 1)
+    cameraControlFrame = CreateFrame("Frame", CameraControlFrameName, UIParent, "BasicFrameTemplateWithInset")
+    cameraControlFrame:SetSize(panelWidth, panelHeight)
+    cameraControlFrame:SetPoint("CENTER")
+    cameraControlFrame:SetMovable(true)
+    cameraControlFrame:EnableMouse(true)
+    cameraControlFrame:RegisterForDrag("LeftButton")
+    cameraControlFrame:SetScript("OnDragStart", function(self)
+      self:StartMoving()
+    end)
+    cameraControlFrame:SetScript("OnDragStop", function(self)
+      self:StopMovingOrSizing()
+    end)
 
-    moveViewInStartButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    cameraControlFrame.title = cameraControlFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    cameraControlFrame.title:SetPoint("CENTER", cameraControlFrame.TitleBg, "CENTER", 0, -2)
+    cameraControlFrame.title:SetText("镜头录制控制器")
+
+    moveViewInStartButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewInStartButton:SetSize(cameraStartStopButtonWidth, 30)
-    moveViewInStartButton:SetPoint("TOPLEFT", "FrameBackdrop", "TOPLEFT", buttonEdgeMargin, -60)
+    moveViewInStartButton:SetPoint("TOPLEFT", CameraControlFrameName, "TOPLEFT", buttonEdgeMargin, -40)
     moveViewInStartButton:SetText("镜头拉近")
     moveViewInStartButton:RegisterForClicks("AnyUp", "AnyDown")
     moveViewInStartButton:SetScript("OnClick", function(self, button, down)
@@ -153,11 +148,11 @@ function showCameraControl()
         end
     end)
 
-    moveViewInSpeedSlider = buildASlider("moveViewInSpeedSliderGlobalName", moveViewInStartButton, FrameBackdrop)
+    moveViewInSpeedSlider = buildASlider("moveViewInSpeedSliderGlobalName", moveViewInStartButton, cameraControlFrame)
 
-    moveViewInStopButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewInStopButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewInStopButton:SetSize(cameraStartStopButtonWidth, 30)
-    moveViewInStopButton:SetPoint("TOPRIGHT", "FrameBackdrop", "TOPRIGHT", -buttonEdgeMargin, -60)
+    moveViewInStopButton:SetPoint("TOPRIGHT", CameraControlFrameName, "TOPRIGHT", -buttonEdgeMargin, -40)
     moveViewInStopButton:SetText("停止拉近")
     moveViewInStopButton:RegisterForClicks("AnyUp", "AnyDown")
     moveViewInStopButton:SetScript("OnClick", function(self, button, down)
@@ -166,7 +161,7 @@ function showCameraControl()
         MoveViewInStop()
     end)
 
-    moveViewOutStartButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewOutStartButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewOutStartButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewOutStartButton:SetPoint("TOP", moveViewInStartButton, "BOTTOM", 0, -15)
     moveViewOutStartButton:SetText("镜头拉远")
@@ -181,9 +176,9 @@ function showCameraControl()
         end
     end)
 
-    moveViewOutSpeedSlider = buildASlider("moveViewOutSpeedSliderGlobalName", moveViewOutStartButton, FrameBackdrop)
+    moveViewOutSpeedSlider = buildASlider("moveViewOutSpeedSliderGlobalName", moveViewOutStartButton, cameraControlFrame)
 
-    moveViewOutStopButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewOutStopButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewOutStopButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewOutStopButton:SetPoint("TOP", moveViewInStopButton, "BOTTOM", 0, -15)
     moveViewOutStopButton:SetText("停止拉远")
@@ -193,7 +188,7 @@ function showCameraControl()
         MoveViewOutStop()
     end)
 
-    moveViewLeftStartButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewLeftStartButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewLeftStartButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewLeftStartButton:SetPoint("TOP", moveViewOutStartButton, "BOTTOM", 0, -15)
     moveViewLeftStartButton:SetText("镜头左旋")
@@ -208,9 +203,9 @@ function showCameraControl()
         end
     end)
 
-    moveViewLeftSpeedSlider = buildASlider("moveViewLeftSpeedSliderGlobalName", moveViewLeftStartButton, FrameBackdrop)
+    moveViewLeftSpeedSlider = buildASlider("moveViewLeftSpeedSliderGlobalName", moveViewLeftStartButton, cameraControlFrame)
 
-    moveViewLeftStopButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewLeftStopButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewLeftStopButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewLeftStopButton:SetPoint("TOP", moveViewOutStopButton, "BOTTOM", 0, -15)
     moveViewLeftStopButton:SetText("停止左旋")
@@ -220,7 +215,7 @@ function showCameraControl()
         MoveViewLeftStop()
     end)
 
-    moveViewRightStartButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewRightStartButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewRightStartButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewRightStartButton:SetPoint("TOP", moveViewLeftStartButton, "BOTTOM", 0, -15)
     moveViewRightStartButton:SetText("镜头右旋")
@@ -235,9 +230,9 @@ function showCameraControl()
         end
     end)
 
-    moveViewRightSpeedSlider = buildASlider("moveViewRightSpeedSliderGlobalName", moveViewRightStartButton, FrameBackdrop)
+    moveViewRightSpeedSlider = buildASlider("moveViewRightSpeedSliderGlobalName", moveViewRightStartButton, cameraControlFrame)
 
-    moveViewRightStopButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewRightStopButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewRightStopButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewRightStopButton:SetPoint("TOP", moveViewLeftStopButton, "BOTTOM", 0, -15)
     moveViewRightStopButton:SetText("停止右旋")
@@ -247,7 +242,7 @@ function showCameraControl()
         MoveViewRightStop()
     end)
 
-    moveViewUpStartButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewUpStartButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewUpStartButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewUpStartButton:SetPoint("TOP", moveViewRightStartButton, "BOTTOM", 0, -15)
     moveViewUpStartButton:SetText("镜头上摇")
@@ -262,9 +257,9 @@ function showCameraControl()
         end
     end)
 
-    moveViewUpSpeedSlider = buildASlider("moveViewUpSpeedSliderGlobalName", moveViewUpStartButton, FrameBackdrop)
+    moveViewUpSpeedSlider = buildASlider("moveViewUpSpeedSliderGlobalName", moveViewUpStartButton, cameraControlFrame)
 
-    moveViewUpStopButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewUpStopButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewUpStopButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewUpStopButton:SetPoint("TOP", moveViewRightStopButton, "BOTTOM", 0, -15)
     moveViewUpStopButton:SetText("停止上摇")
@@ -274,7 +269,7 @@ function showCameraControl()
         MoveViewUpStop()
     end)
 
-    moveViewDownStartButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewDownStartButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewDownStartButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewDownStartButton:SetPoint("TOP", moveViewUpStartButton, "BOTTOM", 0, -15)
     moveViewDownStartButton:SetText("镜头下摇")
@@ -289,9 +284,9 @@ function showCameraControl()
         end
     end)
 
-    moveViewDownSpeedSlider = buildASlider("moveViewDownSpeedSliderGlobalName", moveViewDownStartButton, FrameBackdrop)
+    moveViewDownSpeedSlider = buildASlider("moveViewDownSpeedSliderGlobalName", moveViewDownStartButton, cameraControlFrame)
 
-    moveViewDownStopButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    moveViewDownStopButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     moveViewDownStopButton:SetSize(cameraStartStopButtonWidth, 30)
     moveViewDownStopButton:SetPoint("TOP", moveViewUpStopButton, "BOTTOM", 0, -15)
     moveViewDownStopButton:SetText("停止下摇")
@@ -301,36 +296,27 @@ function showCameraControl()
         MoveViewDownStop()
     end)
 
-    local showPlayerButton = CreateFrame("CheckButton", "showPlayerButtonGlobalName", FrameBackdrop, "OptionsCheckButtonTemplate")
-    showPlayerButton:SetPoint("BOTTOMLEFT", "FrameBackdrop", "BOTTOMLEFT", buttonEdgeMargin, 10)
+    local showPlayerButton = CreateFrame("CheckButton", "showPlayerButtonGlobalName", cameraControlFrame, "OptionsCheckButtonTemplate")
+    showPlayerButton:SetPoint("BOTTOMLEFT", CameraControlFrameName, "BOTTOMLEFT", buttonEdgeMargin, 10)
     showPlayerButton:SetChecked(true)
-		_G[showPlayerButton:GetName() .. "Text"]:SetText("是否显示玩家自己")
+		_G[showPlayerButton:GetName() .. "Text"]:SetText("是否显示自己")
 		showPlayerButton:SetScript("OnClick", function(self, frame)
       local __checked = self:GetChecked()
       if __checked then
         print("checked")
-        C_CVar.SetCVar("showPlayer", 1, "showPlayerEvent_1")
+        SetCVar("showPlayer", 1)
       else
         print("not checked")
-        C_CVar.SetCVar("showPlayer", 0, "showPlayerEvent_0")
+        SetCVar("showPlayer", 0)
       end
 		end)
-
-    local closeButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
-    closeButton:SetSize(50, 30)
-    closeButton:SetPoint("BOTTOM", "FrameBackdrop", "BOTTOM", 0, 10)
-    closeButton:SetText("关闭")
-    closeButton:RegisterForClicks("AnyUp", "AnyDown")
-    closeButton:SetScript("OnClick", function(self, button, down)
-        getglobal("FrameBackdrop"):Hide()
-    end)
 
     local allCameraStartButtons = {moveViewInStartButton, moveViewOutStartButton, moveViewLeftStartButton,
                                    moveViewRightStartButton, moveViewUpStartButton, moveViewDownStartButton}
 
-    local stopAllCameraMoveButton = CreateFrame("Button", nil, FrameBackdrop, "UIPanelButtonTemplate")
+    local stopAllCameraMoveButton = CreateFrame("Button", nil, cameraControlFrame, "UIPanelButtonTemplate")
     stopAllCameraMoveButton:SetSize(180, 30)
-    stopAllCameraMoveButton:SetPoint("BOTTOM", closeButton, "TOP", 0, 15)
+    stopAllCameraMoveButton:SetPoint("BOTTOM", cameraControlFrame, "BOTTOM", 0, 10)
     stopAllCameraMoveButton:SetText("停止所有镜头运动")
     stopAllCameraMoveButton:RegisterForClicks("AnyUp", "AnyDown")
     stopAllCameraMoveButton:SetScript("OnClick", function(self, button, down)

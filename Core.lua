@@ -1,5 +1,6 @@
 SLASH_HELLO1 = "/hello"
 SLASH_WRITER1 = "/writer"
+SLASH_CAMERA_CONTROL1 = "/cc"
 
 printGameTocVersion()
 
@@ -37,6 +38,10 @@ local function WriterHandler(toolId)
     end
 end
 
+local function CameraControlHandler()
+    showCameraControl()
+end
+
 local EventFrame = CreateFrame("Frame")
 EventFrame:RegisterEvent("VARIABLES_LOADED")
 EventFrame:SetScript("OnEvent", function(_, event)
@@ -45,3 +50,4 @@ end)
 
 SlashCmdList.HELLO = HelloHandler
 SlashCmdList.WRITER = WriterHandler
+SlashCmdList.CAMERA_CONTROL = CameraControlHandler
