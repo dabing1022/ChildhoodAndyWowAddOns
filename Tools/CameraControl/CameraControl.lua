@@ -304,10 +304,10 @@ function showCameraControl()
       local __checked = self:GetChecked()
       if __checked then
         print("checked")
-        SetCVar("showPlayer", 1)
+        ConsoleExec("showPlayer 1")
       else
         print("not checked")
-        SetCVar("showPlayer", 0)
+        ConsoleExec("showPlayer 0")
       end
 		end)
 
