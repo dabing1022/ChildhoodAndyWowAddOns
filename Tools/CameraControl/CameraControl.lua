@@ -29,6 +29,8 @@ local moveViewDownStartButton
 local moveViewDownSpeedSlider
 local moveViewDownStopButton  
 
+local weatherDensityControlSlider
+
 local cameraControlFrame
 local CameraControlFrameName = "CameraControlFrame"
 
@@ -90,6 +92,13 @@ local function OnCameraSpeedChanged(slider, value)
   end
 end
 
+local function OnWeatherDensityValueChanged(slider ,value)
+  local intValue = math.floor(value)
+  _G[slider:GetName() .. 'Text']:SetText("天气效果：" .. intValue)
+  ConsoleExec("weatherDensity " .. intValue)
+  ConsoleExec("RAIDweatherDensity " .. intValue)
+end 
+
 local function buildASlider(globalName, alignButton, parent)
   local slider = CreateFrame("Slider", globalName, parent, "OptionsSliderTemplate")
   slider:SetScript("OnValueChanged", nil)
@@ -105,6 +114,26 @@ local function buildASlider(globalName, alignButton, parent)
   _G[slider:GetName() .. 'High']:SetText('2.00')   
   _G[slider:GetName() .. 'Text']:SetText('0.02')
   slider:SetScript("OnValueChanged", OnCameraSpeedChanged)
+
+  return slider
+end
+
+local function buildWeatherDensitySlider(globalName, alignWidget, parent)
+  local slider = CreateFrame("Slider", globalName, parent, "OptionsSliderTemplate")
+  slider:SetScript("OnValueChanged", nil)
+  slider:SetOrientation("HORIZONTAL")
+  slider:SetPoint("TOP", alignWidget, "BOTTOM", 0, -30) 
+  slider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  slider:SetMinMaxValues(0, 3)
+  slider:SetValueStep(1)
+  slider:SetStepsPerPage(1)
+  slider:SetValue(2)
+  slider:SetWidth(panelWidth - 100)
+  slider:SetHeight(15)
+  _G[slider:GetName() .. 'Low']:SetText('0')      
+  _G[slider:GetName() .. 'High']:SetText('3')   
+  _G[slider:GetName() .. 'Text']:SetText("天气效果：" .. '2')
+  slider:SetScript("OnValueChanged", OnWeatherDensityValueChanged)
 
   return slider
 end
@@ -296,10 +325,12 @@ function showCameraControl()
         MoveViewDownStop()
     end)
 
+    weatherDensityControlSlider = buildWeatherDensitySlider("weatherDensityControlSliderGlobalName", moveViewDownSpeedSlider, cameraControlFrame)
+
     local showPlayerButton = CreateFrame("CheckButton", "showPlayerButtonGlobalName", cameraControlFrame, "OptionsCheckButtonTemplate")
     showPlayerButton:SetPoint("BOTTOMLEFT", CameraControlFrameName, "BOTTOMLEFT", buttonEdgeMargin, 10)
     showPlayerButton:SetChecked(true)
-		_G[showPlayerButton:GetName() .. "Text"]:SetText("是否显示自己")
+		_G[showPlayerButton:GetName() .. "Text"]:SetText("切换显示自己")
 		showPlayerButton:SetScript("OnClick", function(self, frame)
       local __checked = self:GetChecked()
       if __checked then
