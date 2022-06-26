@@ -303,10 +303,8 @@ function showCameraControl()
 		showPlayerButton:SetScript("OnClick", function(self, frame)
       local __checked = self:GetChecked()
       if __checked then
-        print("checked")
         ConsoleExec("showPlayer 1")
       else
-        print("not checked")
         ConsoleExec("showPlayer 0")
       end
 		end)
